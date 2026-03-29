@@ -29,7 +29,7 @@ exports.handler = async () => {
 
     await sheets.spreadsheets.values.update({
       spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID,
-      range: "Semanal!A1",
+range: "'Reporte Semanal Ventas - Primero Cafe'!A1",
       valueInputOption: "RAW",
       requestBody: {
         values: [["OK CONECTADO 🚀"]]

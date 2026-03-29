@@ -2,14 +2,30 @@ const { google } = require("googleapis");
 
 exports.handler = async () => {
   try {
-    const auth = new google.auth.JWT(
-      process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      null,
-      process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-      ["https://www.googleapis.com/auth/spreadsheets"]
-    );
+    if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+      throw new Error("Falta GOOGLE_SERVICE_ACCOUNT_EMAIL");
+    }
 
-    const sheets = google.sheets({ version: "v4", auth });
+    if (!process.env.GOOGLE_PRIVATE_KEY) {
+      throw new Error("Falta GOOGLE_PRIVATE_KEY");
+    }
+
+    if (!process.env.GOOGLE_SPREADSHEET_ID) {
+      throw new Error("Falta GOOGLE_SPREADSHEET_ID");
+    }
+
+    const auth = new google.auth.JWT({
+      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"]
+    });
+
+    await auth.authorize();
+
+    const sheets = google.sheets({
+      version: "v4",
+      auth
+    });
 
     await sheets.spreadsheets.values.update({
       spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID,
@@ -27,7 +43,7 @@ exports.handler = async () => {
   } catch (err) {
     return {
       statusCode: 500,
-      body: err.message
+      body: err.message || "Error desconocido"
     };
   }
 };
